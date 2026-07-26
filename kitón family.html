@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Kitón Family - ¡Diversión para toda la familia!</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: #000;
+            overflow: hidden;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', Arial, sans-serif;
+        }
+
+        #logo-container {
+            position: absolute;
+            bottom: -200px;
+            left: -300px;
+            width: 180px;
+            z-index: 100;
+            transition: all 0.6s ease;
+            filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.4));
+            pointer-events: none;
+        }
+
+        #logo-img {
+            width: 100%;
+            display: block;
+            transition: opacity 0.15s ease;
+        }
+
+        .mode-transparent {
+            opacity: 0.6;
+            transition: opacity 0.5s ease;
+        }
+
+        .spin-transform {
+            animation: spin-once 0.8s cubic-bezier(0.5, 0, 0.3, 1);
+        }
+
+        @keyframes spin-once {
+            0%   { transform: rotate(0deg) scale(1); }
+            50%  { transform: rotate(180deg) scale(1.15); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        .glitch-anim {
+            animation: glitch-fx 0.3s forwards;
+        }
+
+        @keyframes glitch-fx {
+            0%   { transform: scale(1); }
+            50%  { transform: scale(1.2) translate(-5px, 5px); }
+            100% { transform: scale(1); }
+        }
+
+        #particles-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: visible;
+        }
+
+        .dust-particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            will-change: transform, opacity;
+        }
+
+        @keyframes dust-fly {
+            0% {
+                transform: translate(0, 0) scale(0);
+                opacity: 1;
+            }
+            30% {
+                opacity: 1;
+                transform: translate(var(--mid-x), var(--mid-y)) scale(1);
+            }
+            100% {
+                transform: translate(var(--end-x), var(--end-y)) scale(0.3);
+                opacity: 0;
+            }
+        }
+
+        /* ============================
+           🐱 GATITO MASCOTA - APOYADO EN LA ESQUINA
+           ============================ */
+        #cat-mascot {
+            position: absolute;
+            bottom: -30px;
+            right: -40px;
+            width: 380px;
+            z-index: 99;
+            pointer-events: none;
+            transform: translate(500px, 500px) scale(0.3) rotate(-45deg);
+            opacity: 0;
+            filter: drop-shadow(-5px -3px 12px rgba(0,0,0,0.6));
+            transition: transform 1.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        opacity 0.6s ease;
+            transform-origin: bottom right;
+        }
+
+        #cat-mascot img {
+            width: 100%;
+            display: block;
+            transform: scaleX(-1);
+        }
+
+        .cat-visible {
+            transform: translate(0, 0) scale(1) rotate(-25deg) !important;
+            opacity: 1 !important;
+            animation: cat-idle 2.5s ease-in-out infinite 1.4s;
+        }
+
+        @keyframes cat-idle {
+            0%, 100% { transform: translate(0, 0) scale(1) rotate(-25deg); }
+            50%      { transform: translate(-5px, -5px) scale(1.02) rotate(-22deg); }
+        }
+
+        .cat-leaving {
+            transform: translate(500px, 500px) scale(0.3) rotate(-60deg) !important;
+            opacity: 0 !important;
+            transition: transform 1s cubic-bezier(0.5, 0, 0.75, 0),
+                        opacity 0.8s ease !important;
+            animation: none !important;
+        }
+
+        #video-player {
+            width: 100vw;
+            height: 100vh;
+            background: black;
+            display: block;
+        }
+
+        #loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 50%, #FFB88C 100%);
+            z-index: 150;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            animation: float-up linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes float-up {
+            0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+            10%  { opacity: 1; }
+            90%  { opacity: 1; }
+            100% { transform: translateY(-100px) scale(1); opacity: 0; }
+        }
+
+        .sparkle {
+            position: absolute;
+            color: #FFF;
+            font-size: 24px;
+            animation: sparkle-twinkle 2s ease-in-out infinite;
+            pointer-events: none;
+            text-shadow: 0 0 10px rgba(255,255,255,0.8);
+        }
+
+        @keyframes sparkle-twinkle {
+            0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+            50%      { opacity: 1; transform: scale(1.2) rotate(180deg); }
+        }
+
+        #loading-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            z-index: 10;
+            padding: 20px;
+        }
+
+        #loading-logo-wrapper {
+            animation: logo-entrance 1s ease-out;
+        }
+
+        @keyframes logo-entrance {
+            0%   { transform: scale(0) rotate(-180deg); opacity: 0; }
+            60%  { transform: scale(1.15) rotate(10deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        #loading-logo {
+            width: 340px;
+            max-width: 80vw;
+            animation: pulse 2.5s ease-in-out infinite;
+            filter: drop-shadow(0 10px 25px rgba(0,0,0,0.35));
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1) translateY(0); }
+            50%      { transform: scale(1.05) translateY(-8px); }
+        }
+
+        #welcome-title {
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+            text-shadow: 3px 3px 0 rgba(0,0,0,0.25), 0 0 20px rgba(255,255,255,0.4);
+            animation: title-bounce 2s ease-in-out infinite;
+            letter-spacing: 1px;
+        }
+
+        @keyframes title-bounce {
+            0%, 100% { transform: translateY(0); }
+            50%      { transform: translateY(-5px); }
+        }
+
+        #loading-bar-container {
+            width: 320px;
+            max-width: 80vw;
+            height: 18px;
+            background: rgba(255,255,255,0.25);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 3px solid white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2), inset 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        #loading-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #FFD93D, #FF6B9D, #C74EFF, #4E9EFF);
+            background-size: 300% 100%;
+            border-radius: 20px;
+            animation: load-fill 2.5s ease-in-out forwards, gradient-move 2s linear infinite;
+            box-shadow: 0 0 15px rgba(255,255,255,0.6);
+        }
+
+        @keyframes load-fill {
+            0%   { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        @keyframes gradient-move {
+            0%   { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
+        }
+
+        #loading-text {
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.25);
+        }
+
+        #start-btn {
+            position: absolute;
+            bottom: 8%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 22px 55px;
+            cursor: pointer;
+            z-index: 200;
+            background: linear-gradient(135deg, #FFD93D 0%, #FF9F43 100%);
+            color: #4A1F00;
+            border: 5px solid white;
+            border-radius: 50px;
+            font-size: 24px;
+            font-weight: bold;
+            font-family: 'Comic Sans MS', Arial, sans-serif;
+            box-shadow: 0 8px 0 #C7500A, 0 12px 25px rgba(0,0,0,0.4);
+            transition: all 0.15s ease;
+            display: none;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 0 rgba(255,255,255,0.4);
+            animation: btn-appear 0.6s ease-out, btn-idle 2s ease-in-out infinite 0.6s;
+        }
+
+        @keyframes btn-appear {
+            0%   { opacity: 0; transform: translateX(-50%) translateY(50px) scale(0.5); }
+            60%  { transform: translateX(-50%) translateY(-10px) scale(1.1); }
+            100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+        }
+
+        @keyframes btn-idle {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50%      { transform: translateX(-50%) scale(1.04); }
+        }
+
+        #start-btn:hover {
+            background: linear-gradient(135deg, #FFE66D 0%, #FFB347 100%);
+            box-shadow: 0 10px 0 #C7500A, 0 15px 30px rgba(0,0,0,0.5);
+            transform: translateX(-50%) translateY(-3px) scale(1.05);
+            animation: none;
+        }
+
+        #start-btn:active {
+            transform: translateX(-50%) translateY(4px) scale(0.98);
+            box-shadow: 0 3px 0 #C7500A, 0 5px 10px rgba(0,0,0,0.3);
+        }
+
+        @media (max-width: 600px) {
+            #welcome-title { font-size: 22px; }
+            #loading-logo { width: 240px; }
+            #start-btn { font-size: 18px; padding: 16px 40px; }
+            #cat-mascot { width: 240px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loading-screen">
+        <div id="loading-content">
+            <div id="loading-logo-wrapper">
+                <img id="loading-logo" src="logo_kiton_family.png" alt="Kitón Family">
+            </div>
+            <div id="welcome-title">¡Bienvenidos a la diversión familiar! 🐾</div>
+            <div id="loading-bar-container">
+                <div id="loading-bar"></div>
+            </div>
+            <div id="loading-text">Cargando...</div>
+        </div>
+        <button id="start-btn">▶ ¡Comenzar Kitón Family!</button>
+    </div>
+
+    <div id="logo-container">
+        <img id="logo-img" src="logo_kiton_family_1.png" alt="Kitón Family">
+        <div id="particles-container"></div>
+    </div>
+
+    <div id="cat-mascot">
+        <img src="gatito_mascota.png" alt="Mascota Kitón">
+    </div>
+
+    <video id="video-player" playsinline></video>
+
+    <script>
+        // ============================================
+        // CONFIGURACIÓN DE ARCHIVOS
+        // ============================================
+        const ID                = "intro_kiton_family.mp4";
+        const VAMOS_COMERCIALES = "corto1.mp4";
+        const FIN_COMERCIALES   = "corto2.mp4";
+        const BLUEY             = "bluey_episodio.mp4";
+        const PELICULA          = "pelicula1.mp4";
+        const MR_BEAN           = "mr bean.mp4";
+
+        const anuncios = [
+            "anuncio1.mp4",
+            "anuncio2.mp4",
+            "anuncio3.mp4",
+            "anuncio4.mp4"
+        ];
+
+        const SECUENCIA_LOGOS = [
+            "logo_kiton_family_2.png",
+            "logo_kiton_family_3.png",
+            "logo_kiton_family_1.png"
+        ];
+
+        // ============================================
+        // CONFIGURACIÓN DE PELÍCULA
+        // ============================================
+        const PELICULA_INICIO = 10;
+        const PELICULA_FIN    = 5539;
+
+        const INTERVALO_CORTE    = 1200;
+        const ANUNCIOS_POR_CORTE = 2;
+
+        const GATITO_APARECE_MS = 8000;
+        const GATITO_DURA_MS    = 5000;
+
+        // ============================================
+        // VARIABLES GLOBALES
+        // ============================================
+        const player           = document.getElementById('video-player');
+        const logo             = document.getElementById('logo-container');
+        const logoImg          = document.getElementById('logo-img');
+        const particlesCont    = document.getElementById('particles-container');
+        const cat              = document.getElementById('cat-mascot');
+        const loadingScreen    = document.getElementById('loading-screen');
+        const startBtn         = document.getElementById('start-btn');
+
+        let playTime           = 0;
+        let nextBreak          = INTERVALO_CORTE;
+        let videoActual        = "";
+        let enCorte            = false;
+        let videoAntesDeCorte  = "";
+        let tiempoAntesDeCorte = 0;
+        let onendedGuardado    = null;
+        let gatitoTimeout1     = null;
+        let gatitoTimeout2     = null;
+        let secuenciaTimeouts  = [];
+
+        // ============================================
+        // HELPER: cargar video en tiempo específico
+        // ============================================
+        function cargarVideoEnTiempo(src, tiempo) {
+            return new Promise((resolve) => {
+                player.onloadedmetadata = null;
+
+                const handler = () => {
+                    player.onloadedmetadata = null;
+                    try {
+                        player.currentTime = tiempo;
+                    } catch (e) {
+                        console.warn("No se pudo setear currentTime:", e);
+                    }
+                    console.log(`⏱️ Video cargado en tiempo: ${tiempo}s`);
+                    resolve();
+                };
+
+                player.onloadedmetadata = handler;
+                player.src = src;
+                player.load();
+            });
+        }
+
+        // ============================================
+        // PARTÍCULAS
+        // ============================================
+        function crearParticulasDePolvo() {
+            const totalParticulas = 25;
+            const colores = [
+                'rgba(255, 220, 150, 0.9)',
+                'rgba(255, 200, 120, 0.85)',
+                'rgba(255, 180, 100, 0.8)',
+                'rgba(255, 240, 200, 0.9)',
+                'rgba(200, 150, 100, 0.7)'
+            ];
+
+            for (let i = 0; i < totalParticulas; i++) {
+                const p = document.createElement('div');
+                p.className = 'dust-particle';
+
+                const size = Math.random() * 8 + 3;
+                p.style.width  = size + 'px';
+                p.style.height = size + 'px';
+
+                const color = colores[Math.floor(Math.random() * colores.length)];
+                p.style.background = color;
+                p.style.boxShadow  = `0 0 ${size * 1.5}px ${color}`;
+
+                p.style.left = '50%';
+                p.style.top  = '50%';
+
+                const angle   = Math.random() * Math.PI * 2;
+                const distMid = Math.random() * 40 + 20;
+                const distEnd = Math.random() * 80 + 60;
+
+                const midX = Math.cos(angle) * distMid;
+                const midY = Math.sin(angle) * distMid;
+                const endX = Math.cos(angle) * distEnd;
+                const endY = Math.sin(angle) * distEnd - 20;
+
+                p.style.setProperty('--mid-x', midX + 'px');
+                p.style.setProperty('--mid-y', midY + 'px');
+                p.style.setProperty('--end-x', endX + 'px');
+                p.style.setProperty('--end-y', endY + 'px');
+
+                const duration = Math.random() * 0.6 + 0.7;
+                p.style.animation = `dust-fly ${duration}s ease-out forwards`;
+                p.style.animationDelay = (Math.random() * 0.2) + 's';
+
+                particlesCont.appendChild(p);
+                setTimeout(() => p.remove(), (duration + 0.3) * 1000);
+            }
+        }
+
+        function girarYCambiar(nuevaSrc) {
+            crearParticulasDePolvo();
+            logoImg.classList.remove('spin-transform');
+            void logoImg.offsetWidth;
+            logoImg.classList.add('spin-transform');
+            setTimeout(() => {
+                logoImg.src = nuevaSrc;
+                console.log(`🎡 Logo cambiado a: ${nuevaSrc}`);
+            }, 400);
+        }
+
+        // ============================================
+        // EFECTOS PANTALLA DE CARGA
+        // ============================================
+        function crearBurbujas() {
+            for (let i = 0; i < 15; i++) {
+                const b = document.createElement('div');
+                b.className = 'bubble';
+                const size = Math.random() * 60 + 20;
+                b.style.width  = size + 'px';
+                b.style.height = size + 'px';
+                b.style.left   = Math.random() * 100 + 'vw';
+                b.style.animationDuration = (Math.random() * 8 + 6) + 's';
+                b.style.animationDelay    = Math.random() * 5 + 's';
+                loadingScreen.appendChild(b);
+            }
+        }
+
+        function crearSparkles() {
+            const symbols = ['✨', '⭐', '💫', '🌟'];
+            for (let i = 0; i < 12; i++) {
+                const sp = document.createElement('div');
+                sp.className = 'sparkle';
+                sp.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                sp.style.left  = Math.random() * 95 + 'vw';
+                sp.style.top   = Math.random() * 90 + 'vh';
+                sp.style.animationDelay    = Math.random() * 2 + 's';
+                sp.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
+                loadingScreen.appendChild(sp);
+            }
+        }
+
+        crearBurbujas();
+        crearSparkles();
+
+        setTimeout(() => {
+            startBtn.style.display = 'block';
+            document.getElementById('loading-text').textContent = '¡Listo!';
+        }, 2600);
+
+        // ============================================
+        // FUNCIONES DEL LOGO
+        // ============================================
+        function esVideoConLogo(src) {
+            return src.includes(PELICULA) || src.includes(BLUEY) || src.includes(MR_BEAN);
+        }
+
+        function esVideoConCortes(src) {
+            return src.includes(PELICULA) || src.includes(BLUEY) || src.includes(MR_BEAN);
+        }
+
+        function limpiarSecuencia() {
+            secuenciaTimeouts.forEach(t => clearTimeout(t));
+            secuenciaTimeouts = [];
+        }
+
+        function iniciarSecuenciaGiros() {
+            limpiarSecuencia();
+
+            secuenciaTimeouts.push(setTimeout(() => {
+                girarYCambiar(SECUENCIA_LOGOS[0]);
+            }, 500));
+
+            secuenciaTimeouts.push(setTimeout(() => {
+                girarYCambiar(SECUENCIA_LOGOS[1]);
+            }, 2500));
+
+            secuenciaTimeouts.push(setTimeout(() => {
+                girarYCambiar(SECUENCIA_LOGOS[2]);
+            }, 4500));
+
+            secuenciaTimeouts.push(setTimeout(() => {
+                logo.classList.add('mode-transparent');
+            }, 6000));
+        }
+
+        function activarLogo(mostrar) {
+            clearTimeout(gatitoTimeout1);
+            clearTimeout(gatitoTimeout2);
+            ocultarGatito();
+            limpiarSecuencia();
+
+            if (mostrar) {
+                logoImg.src = "logo_kiton_family_1.png";
+                logo.style.transform = "translate(0, 0)";
+                logo.classList.remove('mode-transparent', 'glitch-anim');
+                logoImg.classList.remove('spin-transform');
+
+                setTimeout(() => {
+                    logo.style.bottom = "30px";
+                    logo.style.left   = "40px";
+                    iniciarSecuenciaGiros();
+                    programarGatito();
+                }, 800);
+            } else {
+                logo.style.transform = "translate(0, 0)";
+                logo.style.bottom = "-200px";
+                logo.style.left   = "-300px";
+                logo.classList.remove('mode-transparent', 'glitch-anim');
+                logoImg.classList.remove('spin-transform');
+            }
+        }
+
+        function animarSalidaLogo() {
+            clearTimeout(gatitoTimeout1);
+            clearTimeout(gatitoTimeout2);
+            ocultarGatito();
+            limpiarSecuencia();
+
+            logo.classList.remove('mode-transparent');
+            logo.classList.add('glitch-anim');
+            setTimeout(() => {
+                logo.style.transform = "translate(200vw, -200vh)";
+            }, 30);
+        }
+
+        // ============================================
+        // 🐱 GATITO
+        // ============================================
+        function mostrarGatito() {
+            cat.classList.remove('cat-leaving');
+            void cat.offsetWidth;
+            cat.classList.add('cat-visible');
+            console.log("🐱 ¡El gatito llegó apoyado en la esquina!");
+        }
+
+        function ocultarGatito() {
+            if (cat.classList.contains('cat-visible')) {
+                cat.classList.remove('cat-visible');
+                cat.classList.add('cat-leaving');
+                console.log("🐱 El gatito se va... 👋");
+                setTimeout(() => {
+                    cat.classList.remove('cat-leaving');
+                }, 1100);
+            } else {
+                cat.classList.remove('cat-visible', 'cat-leaving');
+            }
+        }
+
+        function programarGatito() {
+            gatitoTimeout1 = setTimeout(() => {
+                mostrarGatito();
+                gatitoTimeout2 = setTimeout(() => {
+                    ocultarGatito();
+                }, GATITO_DURA_MS);
+            }, GATITO_APARECE_MS);
+        }
+
+        // ============================================
+        // REPRODUCIR
+        // ============================================
+        function reproducir(src, permiteLogo) {
+            return new Promise((resolve) => {
+                player.onloadedmetadata = null;
+
+                player.src   = src;
+                videoActual  = src;
+                activarLogo(permiteLogo && esVideoConLogo(src));
+
+                player.onloadedmetadata = () => {
+                    player.onloadedmetadata = null;
+                    try { player.currentTime = 0; } catch(e) {}
+                };
+
+                player.onended = () => {
+                    player.onended = null;
+                    resolve();
+                };
+
+                player.play().catch(e => {
+                    console.error("❌ Error al reproducir:", src, e);
+                    setTimeout(resolve, 500);
+                });
+            });
+        }
+
+        // ============================================
+        // RONDA DE COMERCIALES
+        // ============================================
+        async function rondaDeComerciales(cantidad) {
+            console.log("📺 Ronda de comerciales - " + cantidad + " anuncios");
+            enCorte = true;
+            animarSalidaLogo();
+            await new Promise(res => setTimeout(res, 700));
+
+            await reproducir(VAMOS_COMERCIALES, false);
+
+            const ronda = [...anuncios].sort(() => 0.5 - Math.random()).slice(0, cantidad);
+            for (const a of ronda) {
+                await reproducir(a, false);
+            }
+
+            await reproducir(FIN_COMERCIALES, false);
+            console.log("✅ Fin de la ronda de comerciales");
+            enCorte = false;
+        }
+
+        // ============================================
+        // CONTROL DE TIEMPO Y CORTES
+        // ============================================
+        player.ontimeupdate = async () => {
+            if (enCorte) return;
+            if (!esVideoConCortes(player.src)) return;
+
+            playTime = player.currentTime;
+            let tiempoRestante = player.duration - playTime;
+
+            if (player.src.includes(PELICULA)) {
+                tiempoRestante = PELICULA_FIN - playTime;
+                if (playTime >= PELICULA_FIN) {
+                    console.log("🎬 Película terminada (tiempo personalizado)");
+                    player.pause();
+                    if (player.onended) player.onended();
+                    return;
+                }
+            }
+
+            if (playTime >= nextBreak && tiempoRestante > 60) {
+                enCorte = true;
+                console.log(`⏸️ CORTE COMERCIAL - Guardando: ${player.src.split('/').pop()} en ${Math.floor(playTime)}s`);
+
+                videoAntesDeCorte  = player.src;
+                tiempoAntesDeCorte = player.currentTime;
+                onendedGuardado    = player.onended;
+
+                player.pause();
+                player.onended = null;
+
+                animarSalidaLogo();
+                await new Promise(res => setTimeout(res, 700));
+
+                await rondaDeComerciales(ANUNCIOS_POR_CORTE);
+
+                console.log(`▶️ REGRESANDO a: ${videoAntesDeCorte.split('/').pop()} en ${Math.floor(tiempoAntesDeCorte)}s`);
+
+                await cargarVideoEnTiempo(videoAntesDeCorte, tiempoAntesDeCorte);
+                videoActual    = videoAntesDeCorte;
+                player.onended = onendedGuardado;
+
+                player.play().catch(e => console.error("Error al reanudar:", e));
+                activarLogo(true);
+
+                nextBreak += INTERVALO_CORTE;
+                enCorte = false;
+            }
+        };
+
+        // ============================================
+        // PROGRAMAS LARGOS
+        // ============================================
+        function reproducirPrograma(src) {
+            return new Promise((resolve) => {
+                player.onloadedmetadata = null;
+
+                player.src   = src;
+                videoActual  = src;
+                nextBreak    = INTERVALO_CORTE;
+                activarLogo(true);
+
+                player.onloadedmetadata = () => {
+                    player.onloadedmetadata = null;
+                    try { player.currentTime = 0; } catch(e) {}
+                };
+
+                const onendedHandler = () => {
+                    if (player.src.includes(src)) {
+                        player.onended = null;
+                        console.log("✅ Terminó:", src);
+                        resolve();
+                    }
+                };
+
+                player.onended = onendedHandler;
+                player.play().catch(e => {
+                    console.error("❌ Error:", src, e);
+                    setTimeout(resolve, 500);
+                });
+            });
+        }
+
+        // ============================================
+        // PELÍCULA
+        // ============================================
+        function reproducirPelicula() {
+            return new Promise((resolve) => {
+                player.onloadedmetadata = null;
+
+                player.src   = PELICULA;
+                videoActual  = PELICULA;
+                nextBreak    = INTERVALO_CORTE + PELICULA_INICIO;
+                activarLogo(true);
+
+                player.onloadedmetadata = () => {
+                    player.onloadedmetadata = null;
+                    try {
+                        player.currentTime = PELICULA_INICIO;
+                        console.log(`🎬 Película iniciada en ${PELICULA_INICIO}s`);
+                    } catch(e) {
+                        console.warn("No se pudo saltar al inicio:", e);
+                    }
+                };
+
+                const onendedHandler = () => {
+                    if (player.src.includes(PELICULA)) {
+                        player.onended = null;
+                        console.log("✅ Terminó: PELÍCULA");
+                        resolve();
+                    }
+                };
+
+                player.onended = onendedHandler;
+                player.play().catch(e => {
+                    console.error("❌ Error:", PELICULA, e);
+                    setTimeout(resolve, 500);
+                });
+            });
+        }
+
+        // ============================================
+        // 🎬 PROGRAMACIÓN COMPLETA
+        // ============================================
+        startBtn.onclick = async () => {
+            loadingScreen.style.transition = 'opacity 0.8s ease';
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => loadingScreen.style.display = 'none', 800);
+
+            try {
+                console.log("🎬 Iniciando: INTRO");
+                await reproducir(ID, false);
+
+                console.log("📺 Ronda de comerciales inicial");
+                await rondaDeComerciales(3);
+
+                console.log("🎬 INTRO antes de Bluey");
+                await reproducir(ID, false);
+
+                console.log("🐶 Iniciando: BLUEY");
+                await reproducirPrograma(BLUEY);
+
+                console.log("🎬 INTRO antes de Película");
+                await reproducir(ID, false);
+                await rondaDeComerciales(3);
+                console.log("🎬 INTRO otra vez");
+                await reproducir(ID, false);
+
+                console.log("🎥 Iniciando: PELÍCULA");
+                await reproducirPelicula();
+
+                console.log("🎬 INTRO antes de Mr. Bean");
+                await reproducir(ID, false);
+                await rondaDeComerciales(3);
+                console.log("🎬 INTRO otra vez");
+                await reproducir(ID, false);
+
+                console.log("🤪 Iniciando: MR. BEAN");
+                await reproducirPrograma(MR_BEAN);
+
+                console.log("✅ Programación terminada");
+            } catch (err) {
+                console.error("❌ Error en la programación:", err);
+            }
+        };
+    </script>
+</body>
+</html>
