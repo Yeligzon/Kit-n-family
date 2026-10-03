@@ -50,18 +50,23 @@ function crearBurbujas() {
 }
 crearBurbujas();
 
-// INICIALIZAR YOUTUBE
+// ============================================
+// 📺 INICIALIZAR YOUTUBE (MODO TELEVISIÓN)
+// ============================================
 window.onYouTubeIframeAPIReady = function() {
     ytPlayer = new YT.Player('player', {
         height: '100%',
         width: '100%',
         playerVars: {
             'autoplay': 1,
-            'controls': 0,
-            'disablekb': 1,
-            'modestbranding': 1,
-            'rel': 0,
-            'showinfo': 0
+            'mute': 1,            // 👈 OBLIGATORIO: Inicia muteado para saltar el bloqueo del navegador
+            'controls': 0,        // Oculta barra de tiempo y pausa
+            'disablekb': 1,       // Desactiva atajos de teclado
+            'modestbranding': 1,  // Quita el logo grande de YouTube
+            'rel': 0,             // No muestra videos recomendados al final
+            'showinfo': 0,
+            'iv_load_policy': 3,  // Quita anotaciones dentro del video
+            'fs': 0
         },
         events: {
             'onReady': onPlayerReady,
@@ -71,33 +76,29 @@ window.onYouTubeIframeAPIReady = function() {
 };
 
 function onPlayerReady(event) {
-    console.log("🚀 Motor de YouTube LISTO. Iniciando transmisión...");
+    console.log("🚀 Motor de YouTube LISTO. Transmitiendo en vivo...");
     
-    // Ocultar pantalla de carga automáticamente
+    // Ocultar pantalla de carga
     setTimeout(() => {
         loadingScreen.style.opacity = '0';
         setTimeout(() => loadingScreen.style.display = 'none', 800);
         iniciarTransmision();
-    }, 1500);
+    }, 1200);
 }
 
-function onPlayerStateChange(event) {
-    if (event.data === YT.PlayerState.ENDED) {
-        if (resolveVideoActual) {
-            let callback = resolveVideoActual;
-            resolveVideoActual = null;
-            callback();
-        }
+// ACTIVAR SONIDO AL PRIMER CLIC EN CUALQUIER PARTE
+function activarAudio() {
+    if (ytPlayer && ytPlayer.unMute) {
+        ytPlayer.unMute();
+        ytPlayer.setVolume(100);
+        console.log("🔊 Audio activado");
     }
+    const banner = document.getElementById('unmute-banner');
+    if (banner) banner.style.display = 'none';
 }
 
-function reproducirYouTube(videoId, conLogo = false) {
-    return new Promise((resolve) => {
-        resolveVideoActual = resolve;
-        activarLogo(conLogo);
-        ytPlayer.loadVideoById(videoId);
-    });
-}
+document.addEventListener('click', activarAudio);
+document.addEventListener('touchstart', activarAudio);
 
 // ============================================
 // ANIMACIONES Y LOGO
