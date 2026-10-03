@@ -1,19 +1,15 @@
 // ============================================
 // 📺 CONFIGURACIÓN DE VIDEOS (IDs DE YOUTUBE)
 // ============================================
-// Solo pon los 11 caracteres del ID del video de YouTube:
-
-const INTRO_CHANNEL     = "4KJ4UbKHL3k";      // Tu Intro principal
-const BUMPER_COMERCIAL  = "ID_BUMPER_YOUTUBE";     // Bumper "Ya volvemos"
-const BUMPER_REGRESO    = "ID_REGRESO_YOUTUBE";    // Bumper "Estamos de vuelta"
+const INTRO_CHANNEL     = "4KJ4UbKHL3k";   // Reemplaza por tu ID de Intro
+const BUMPER_COMERCIAL  = "dQw4w9WgXcQ";   // Reemplaza por tu ID de Bumper
+const BUMPER_REGRESO    = "dQw4w9WgXcQ";   // Reemplaza por tu ID de Regreso
 
 // Serie estrella:
-const WOLFBLOOD_EP1     = "ID_WOLFBLOOD_YOUTUBE";   // Episodio de Wolfblood
+const WOLFBLOOD_EP1     = "dQw4w9WgXcQ";   // Reemplaza por ID de Wolfblood
 
-// Comerciales o Anuncios (IDs de YouTube)
 const anuncios = [
-    "ID_ANUNCIO_1",
-    "ID_ANUNCIO_2"
+    "dQw4w9WgXcQ"
 ];
 
 const SECUENCIA_LOGOS = [
@@ -22,7 +18,6 @@ const SECUENCIA_LOGOS = [
     "logo_kiton_family_1.png"
 ];
 
-// Configuración del gatito
 const GATITO_APARECE_MS = 8000;
 const GATITO_DURA_MS    = 5000;
 
@@ -34,44 +29,58 @@ const logoImg          = document.getElementById('logo-img');
 const particlesCont    = document.getElementById('particles-container');
 const cat              = document.getElementById('cat-mascot');
 const loadingScreen    = document.getElementById('loading-screen');
-const startBtn         = document.getElementById('start-btn');
 
 let ytPlayer           = null;
-let ytReady            = false;
 let resolveVideoActual = null;
 let gatitoTimeout1     = null;
 let gatitoTimeout2     = null;
-let secuenciaTimeouts  = [];
 
-// Inicialización de la API de YouTube
-function onYouTubeIframeAPIReady() {
+// EFECTOS EN PANTALLA DE CARGA
+function crearBurbujas() {
+    for (let i = 0; i < 15; i++) {
+        const b = document.createElement('div');
+        b.className = 'bubble';
+        const size = Math.random() * 60 + 20;
+        b.style.width  = size + 'px'; b.style.height = size + 'px';
+        b.style.left   = Math.random() * 100 + 'vw';
+        b.style.animationDuration = (Math.random() * 8 + 6) + 's';
+        b.style.animationDelay    = Math.random() * 5 + 's';
+        loadingScreen.appendChild(b);
+    }
+}
+crearBurbujas();
+
+// INICIALIZAR YOUTUBE
+window.onYouTubeIframeAPIReady = function() {
     ytPlayer = new YT.Player('player', {
         height: '100%',
         width: '100%',
         playerVars: {
             'autoplay': 1,
-            'controls': 0,        // Oculta controles de YouTube
-            'disablekb': 1,       // Desactiva teclado
-            'modestbranding': 1,  // Oculta marcas de YouTube
-            'rel': 0,             // No muestra videos recomendados al final
-            'showinfo': 0,
-            'fs': 0
+            'controls': 0,
+            'disablekb': 1,
+            'modestbranding': 1,
+            'rel': 0,
+            'showinfo': 0
         },
         events: {
             'onReady': onPlayerReady,
             'onStateChange': onPlayerStateChange
         }
     });
-}
+};
 
 function onPlayerReady(event) {
-    ytReady = true;
-    console.log("🚀 Motor de YouTube de Kitón Family LISTO");
-    startBtn.style.display = 'block';
-    document.getElementById('loading-text').textContent = '¡Listo!';
+    console.log("🚀 Motor de YouTube LISTO. Iniciando transmisión...");
+    
+    // Ocultar pantalla de carga automáticamente
+    setTimeout(() => {
+        loadingScreen.style.opacity = '0';
+        setTimeout(() => loadingScreen.style.display = 'none', 800);
+        iniciarTransmision();
+    }, 1500);
 }
 
-// Detectar cuando termina un video de YouTube
 function onPlayerStateChange(event) {
     if (event.data === YT.PlayerState.ENDED) {
         if (resolveVideoActual) {
@@ -82,7 +91,6 @@ function onPlayerStateChange(event) {
     }
 }
 
-// Función mágica para reproducir cualquier ID de YouTube
 function reproducirYouTube(videoId, conLogo = false) {
     return new Promise((resolve) => {
         resolveVideoActual = resolve;
@@ -92,11 +100,11 @@ function reproducirYouTube(videoId, conLogo = false) {
 }
 
 // ============================================
-// EFECTOS VISUALES Y ANIMACIONES (TUS FUNCIONES)
+// ANIMACIONES Y LOGO
 // ============================================
 function crearParticulasDePolvo() {
     const totalParticulas = 20;
-    const colores = ['rgba(255, 220, 150, 0.9)', 'rgba(255, 200, 120, 0.85)'];
+    const colores = ['rgba(144, 224, 239, 0.9)', 'rgba(0, 180, 216, 0.85)'];
     for (let i = 0; i < totalParticulas; i++) {
         const p = document.createElement('div');
         p.className = 'dust-particle';
@@ -120,14 +128,6 @@ function crearParticulasDePolvo() {
         particlesCont.appendChild(p);
         setTimeout(() => p.remove(), (duration + 0.3) * 1000);
     }
-}
-
-function girarYCambiar(nuevaSrc) {
-    crearParticulasDePolvo();
-    logoImg.classList.remove('spin-transform');
-    void logoImg.offsetWidth;
-    logoImg.classList.add('spin-transform');
-    setTimeout(() => { logoImg.src = nuevaSrc; }, 400);
 }
 
 function activarLogo(mostrar) {
@@ -161,38 +161,31 @@ function ocultarGatito() { if (cat.classList.contains('cat-visible')) { cat.clas
 function programarGatito() { gatitoTimeout1 = setTimeout(() => { mostrarGatito(); gatitoTimeout2 = setTimeout(() => { ocultarGatito(); }, GATITO_DURA_MS); }, GATITO_APARECE_MS); }
 
 // ============================================
-// RONDA DE COMERCIALES
+// 🎬 TRANSMISIÓN AUTOMÁTICA
 // ============================================
-async function rondaDeComerciales() {
-    animarSalidaLogo();
-    await reproducirYouTube(BUMPER_COMERCIAL, false);
-    
-    // Reproducir 1 o 2 anuncios aleatorios
-    const anuncioElegido = anuncios[Math.floor(Math.random() * anuncios.length)];
-    await reproducirYouTube(anuncioElegido, false);
-    
-    await reproducirYouTube(BUMPER_REGRESO, false);
-}
-
-// ============================================
-// 🎬 TRANSMISIÓN EN VIVO DE KITÓN FAMILY
-// ============================================
-startBtn.onclick = async () => {
-    loadingScreen.style.opacity = '0';
-    setTimeout(() => loadingScreen.style.display = 'none', 800);
-
+async function iniciarTransmision() {
     try {
         console.log("📺 1. Reproduciendo INTRO");
         await reproducirYouTube(INTRO_CHANNEL, false);
 
-        console.log("🐺 2. TRANSMITIENDO: WOLFBLOOD (Episodio 1)");
-        await reproducirYouTube(WOLFBLOOD_EP1, true); // true = Muestra logo y gatito
+        console.log("🐺 2. TRANSMITIENDO: WOLFBLOOD");
+        await reproducirYouTube(WOLFBLOOD_EP1, true);
 
-        console.log("📺 3. Entrando a Comerciales");
-        await rondaDeComerciales();
+        console.log("📺 3. Entrando a Comercial");
+        animarSalidaLogo();
+        await reproducirYouTube(BUMPER_COMERCIAL, false);
+        await reproducirYouTube(anuncios[0], false);
+        await reproducirYouTube(BUMPER_REGRESO, false);
 
-        console.log("✅ Fin de la transmisión de hoy");
+        console.log("✅ Fin de transmisión");
     } catch (err) {
-        console.error("❌ Error en la transmisión:", err);
+        console.error("❌ Error en transmisión:", err);
     }
-};
+}
+
+// Respaldo por si el navegador exige un clic para activar audio
+document.body.addEventListener('click', () => {
+    if (ytPlayer && ytPlayer.playVideo) {
+        ytPlayer.playVideo();
+    }
+}, { once: true });
