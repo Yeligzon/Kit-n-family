@@ -7,14 +7,50 @@ body {
     font-family: 'Comic Sans MS', 'Chalkboard SE', Arial, sans-serif;
 }
 
-#player {
+/* 📺 REPRODUCTOR OCULTO DE BORDES Y BOTONES */
+#player-container {
     position: absolute;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    pointer-events: none;
+    overflow: hidden;
     z-index: 1;
+}
+
+#player {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100vw;
+    height: 100vh;
+    /* Agrandamos un poco el video para ocultar títulos e íconos de YouTube */
+    transform: translate(-50%, -50%) scale(1.15);
+    pointer-events: none; /* Nadie puede pausar la TV haciendo clic en el video */
+}
+
+/* 🔊 CARTEL FLOTANTE PARA ACTIVAR SONIDO */
+#unmute-banner {
+    position: absolute;
+    top: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 119, 182, 0.9);
+    color: #FFF;
+    padding: 12px 28px;
+    border-radius: 30px;
+    font-size: 16px;
+    font-weight: bold;
+    z-index: 200;
+    box-shadow: 0 4px 15px rgba(0, 212, 255, 0.5);
+    border: 2px solid #90E0EF;
+    cursor: pointer;
+    animation: banner-bounce 1.5s infinite;
+}
+
+@keyframes banner-bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50%      { transform: translateX(-50%) translateY(-6px); }
 }
 
 #logo-container {
