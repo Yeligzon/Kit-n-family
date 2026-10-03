@@ -1,18 +1,19 @@
 // ============================================
-// CONFIGURACIÓN DE ARCHIVOS
+// 📺 CONFIGURACIÓN DE VIDEOS (IDs DE YOUTUBE)
 // ============================================
-const ID                = "intro_kiton_family.mp4";
-const VAMOS_COMERCIALES = "corto1.mp4";
-const FIN_COMERCIALES   = "corto2.mp4";
-const BLUEY             = "bluey_episodio.mp4";
-const PELICULA          = "pelicula1.mp4";
-const MR_BEAN           = "mr bean.mp4";
+// Solo pon los 11 caracteres del ID del video de YouTube:
 
+const INTRO_CHANNEL     = "ID_INTRO_YOUTUBE";      // Tu Intro principal
+const BUMPER_COMERCIAL  = "ID_BUMPER_YOUTUBE";     // Bumper "Ya volvemos"
+const BUMPER_REGRESO    = "ID_REGRESO_YOUTUBE";    // Bumper "Estamos de vuelta"
+
+// Serie estrella:
+const WOLFBLOOD_EP1     = "ID_WOLFBLOOD_YOUTUBE";   // Episodio de Wolfblood
+
+// Comerciales o Anuncios (IDs de YouTube)
 const anuncios = [
-    "anuncio1.mp4",
-    "anuncio2.mp4",
-    "anuncio3.mp4",
-    "anuncio4.mp4"
+    "ID_ANUNCIO_1",
+    "ID_ANUNCIO_2"
 ];
 
 const SECUENCIA_LOGOS = [
@@ -21,22 +22,13 @@ const SECUENCIA_LOGOS = [
     "logo_kiton_family_1.png"
 ];
 
-// ============================================
-// CONFIGURACIÓN DE TIEMPOS
-// ============================================
-const PELICULA_INICIO = 10;
-const PELICULA_FIN    = 5539;
-
-const INTERVALO_CORTE    = 1200;
-const ANUNCIOS_POR_CORTE = 2;
-
+// Configuración del gatito
 const GATITO_APARECE_MS = 8000;
 const GATITO_DURA_MS    = 5000;
 
 // ============================================
-// VARIABLES GLOBALES
+// VARIABLES GLOBALES Y YOUTUBE API
 // ============================================
-const player           = document.getElementById('video-player');
 const logo             = document.getElementById('logo-container');
 const logoImg          = document.getElementById('logo-img');
 const particlesCont    = document.getElementById('particles-container');
@@ -44,22 +36,66 @@ const cat              = document.getElementById('cat-mascot');
 const loadingScreen    = document.getElementById('loading-screen');
 const startBtn         = document.getElementById('start-btn');
 
-let playTime           = 0;
-let nextBreak          = INTERVALO_CORTE;
-let videoActual        = "";
-let enCorte            = false;
-let videoAntesDeCorte  = "";
-let tiempoAntesDeCorte = 0;
-let onendedGuardado    = null;
+let ytPlayer           = null;
+let ytReady            = false;
+let resolveVideoActual = null;
 let gatitoTimeout1     = null;
 let gatitoTimeout2     = null;
 let secuenciaTimeouts  = [];
 
+// Inicialización de la API de YouTube
+function onYouTubeIframeAPIReady() {
+    ytPlayer = new YT.Player('player', {
+        height: '100%',
+        width: '100%',
+        playerVars: {
+            'autoplay': 1,
+            'controls': 0,        // Oculta controles de YouTube
+            'disablekb': 1,       // Desactiva teclado
+            'modestbranding': 1,  // Oculta marcas de YouTube
+            'rel': 0,             // No muestra videos recomendados al final
+            'showinfo': 0,
+            'fs': 0
+        },
+        events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+        }
+    });
+}
+
+function onPlayerReady(event) {
+    ytReady = true;
+    console.log("🚀 Motor de YouTube de Kitón Family LISTO");
+    startBtn.style.display = 'block';
+    document.getElementById('loading-text').textContent = '¡Listo!';
+}
+
+// Detectar cuando termina un video de YouTube
+function onPlayerStateChange(event) {
+    if (event.data === YT.PlayerState.ENDED) {
+        if (resolveVideoActual) {
+            let callback = resolveVideoActual;
+            resolveVideoActual = null;
+            callback();
+        }
+    }
+}
+
+// Función mágica para reproducir cualquier ID de YouTube
+function reproducirYouTube(videoId, conLogo = false) {
+    return new Promise((resolve) => {
+        resolveVideoActual = resolve;
+        activarLogo(conLogo);
+        ytPlayer.loadVideoById(videoId);
+    });
+}
+
 // ============================================
-// LÓGICA DE LA INTERFAZ
+// EFECTOS VISUALES Y ANIMACIONES (TUS FUNCIONES)
 // ============================================
 function crearParticulasDePolvo() {
-    const totalParticulas = 25;
+    const totalParticulas = 20;
     const colores = ['rgba(255, 220, 150, 0.9)', 'rgba(255, 200, 120, 0.85)'];
     for (let i = 0; i < totalParticulas; i++) {
         const p = document.createElement('div');
@@ -94,34 +130,24 @@ function girarYCambiar(nuevaSrc) {
     setTimeout(() => { logoImg.src = nuevaSrc; }, 400);
 }
 
-// Pantalla de Carga
-setTimeout(() => {
-    startBtn.style.display = 'block';
-    document.getElementById('loading-text').textContent = '¡Listo!';
-}, 2600);
-
-// ============================================
-// FUNCIONES DE REPRODUCCIÓN
-// ============================================
-function esVideoConLogo(src) {
-    return src.includes(PELICULA) || src.includes(BLUEY) || src.includes(MR_BEAN);
-}
-function esVideoConCortes(src) {
-    return src.includes(PELICULA) || src.includes(BLUEY) || src.includes(MR_BEAN);
-}
-
 function activarLogo(mostrar) {
+    clearTimeout(gatitoTimeout1);
+    clearTimeout(gatitoTimeout2);
+    ocultarGatito();
+
     if (mostrar) {
         logoImg.src = "logo_kiton_family_1.png";
         logo.style.transform = "translate(0, 0)";
         logo.classList.remove('mode-transparent', 'glitch-anim');
         setTimeout(() => {
-            logo.style.bottom = "30px"; logo.style.left = "40px";
+            logo.style.bottom = "30px"; 
+            logo.style.left = "40px";
             programarGatito();
         }, 800);
     } else {
         logo.style.transform = "translate(0, 0)";
-        logo.style.bottom = "-200px"; logo.style.left = "-300px";
+        logo.style.bottom = "-200px"; 
+        logo.style.left = "-300px";
     }
 }
 
@@ -132,77 +158,41 @@ function animarSalidaLogo() {
 
 function mostrarGatito() { cat.classList.remove('cat-leaving'); cat.classList.add('cat-visible'); }
 function ocultarGatito() { if (cat.classList.contains('cat-visible')) { cat.classList.remove('cat-visible'); cat.classList.add('cat-leaving'); } }
-function programarGatito() { setTimeout(() => { mostrarGatito(); setTimeout(() => { ocultarGatito(); }, GATITO_DURA_MS); }, GATITO_APARECE_MS); }
+function programarGatito() { gatitoTimeout1 = setTimeout(() => { mostrarGatito(); gatitoTimeout2 = setTimeout(() => { ocultarGatito(); }, GATITO_DURA_MS); }, GATITO_APARECE_MS); }
 
-function cargarVideoEnTiempo(src, tiempo) {
-    return new Promise((resolve) => {
-        player.onloadedmetadata = () => {
-            player.onloadedmetadata = null;
-            player.currentTime = tiempo;
-            resolve();
-        };
-        player.src = src; player.load();
-    });
-}
-
-function reproducir(src, permiteLogo) {
-    return new Promise((resolve) => {
-        player.src = src;
-        activarLogo(permiteLogo && esVideoConLogo(src));
-        player.onended = () => { player.onended = null; resolve(); };
-        player.play().catch(e => setTimeout(resolve, 500));
-    });
-}
-
-async function rondaDeComerciales(cantidad) {
-    enCorte = true; animarSalidaLogo();
-    await new Promise(res => setTimeout(res, 700));
-    await reproducir(VAMOS_COMERCIALES, false);
+// ============================================
+// RONDA DE COMERCIALES
+// ============================================
+async function rondaDeComerciales() {
+    animarSalidaLogo();
+    await reproducirYouTube(BUMPER_COMERCIAL, false);
     
-    const ronda = [...anuncios].sort(() => 0.5 - Math.random()).slice(0, cantidad);
-    for (const a of ronda) await reproducir(a, false);
+    // Reproducir 1 o 2 anuncios aleatorios
+    const anuncioElegido = anuncios[Math.floor(Math.random() * anuncios.length)];
+    await reproducirYouTube(anuncioElegido, false);
     
-    await reproducir(FIN_COMERCIALES, false);
-    enCorte = false;
+    await reproducirYouTube(BUMPER_REGRESO, false);
 }
 
 // ============================================
-// CORTES AUTOMÁTICOS
-// ============================================
-player.ontimeupdate = async () => {
-    if (enCorte) return;
-    if (!esVideoConCortes(player.src)) return;
-
-    playTime = player.currentTime;
-    
-    if (playTime >= nextBreak && (player.duration - playTime) > 60) {
-        enCorte = true;
-        videoAntesDeCorte = player.src; tiempoAntesDeCorte = player.currentTime;
-        onendedGuardado = player.onended;
-        
-        player.pause(); player.onended = null;
-        await rondaDeComerciales(ANUNCIOS_POR_CORTE);
-        
-        await cargarVideoEnTiempo(videoAntesDeCorte, tiempoAntesDeCorte);
-        player.onended = onendedGuardado;
-        player.play(); activarLogo(true);
-        nextBreak += INTERVALO_CORTE; enCorte = false;
-    }
-};
-
-// ============================================
-// 🎬 EJECUCIÓN PRINCIPAL
+// 🎬 TRANSMISIÓN EN VIVO DE KITÓN FAMILY
 // ============================================
 startBtn.onclick = async () => {
     loadingScreen.style.opacity = '0';
     setTimeout(() => loadingScreen.style.display = 'none', 800);
 
     try {
-        await reproducir(ID, false);
-        await rondaDeComerciales(2);
-        
-        // Aquí es donde meteremos YouTube luego 🚀
-        await reproducir(BLUEY, true); 
+        console.log("📺 1. Reproduciendo INTRO");
+        await reproducirYouTube(INTRO_CHANNEL, false);
 
-    } catch (err) { console.error(err); }
+        console.log("🐺 2. TRANSMITIENDO: WOLFBLOOD (Episodio 1)");
+        await reproducirYouTube(WOLFBLOOD_EP1, true); // true = Muestra logo y gatito
+
+        console.log("📺 3. Entrando a Comerciales");
+        await rondaDeComerciales();
+
+        console.log("✅ Fin de la transmisión de hoy");
+    } catch (err) {
+        console.error("❌ Error en la transmisión:", err);
+    }
 };
