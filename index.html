@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kitón Family - ¡Televisión Kawaii!</title>
     <link rel="stylesheet" href="style.css">
-    <!-- API DE YOUTUBE -->
     <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
-    <!-- PANTALLA DE CARGA EN AZUL -->
+    <!-- AVISO DE AUDIO -->
+    <div id="unmute-banner">🔊 Haz clic en cualquier lugar para activar el sonido</div>
+
+    <!-- PANTALLA DE CARGA -->
     <div id="loading-screen">
         <div id="loading-content">
             <div id="loading-logo-wrapper">
@@ -20,7 +22,7 @@
             <div id="loading-bar-container">
                 <div id="loading-bar"></div>
             </div>
-            <div id="loading-text">Cargando señal azul... 📡</div>
+            <div id="loading-text">Cargando señal... 📡</div>
         </div>
     </div>
 
@@ -35,8 +37,10 @@
         <img src="gatito_mascota.png" alt="Mascota Kitón">
     </div>
 
-    <!-- REPRODUCTOR GENERAL DE YOUTUBE -->
-    <div id="player"></div>
+    <!-- REPRODUCTOR ENVOLVENTE SIN BORDES -->
+    <div id="player-container">
+        <div id="player"></div>
+    </div>
 
     <script src="app.js"></script>
 </body>
