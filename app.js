@@ -3,7 +3,7 @@
 // ============================================
 // Solo pon los 11 caracteres del ID del video de YouTube:
 
-const INTRO_CHANNEL     = "ID_INTRO_YOUTUBE";      // Tu Intro principal
+const INTRO_CHANNEL     = "4KJ4UbKHL3k";      // Tu Intro principal
 const BUMPER_COMERCIAL  = "ID_BUMPER_YOUTUBE";     // Bumper "Ya volvemos"
 const BUMPER_REGRESO    = "ID_REGRESO_YOUTUBE";    // Bumper "Estamos de vuelta"
 
