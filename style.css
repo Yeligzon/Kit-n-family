@@ -219,3 +219,13 @@ body {
     #welcome-title { font-size: 22px; } #loading-logo { width: 240px; }
     #start-btn { font-size: 18px; padding: 16px 40px; } #cat-mascot { width: 240px; }
 }
+
+#player {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none; /* Evita que la gente pause el video haciendo clic, como TV real */
+    z-index: 1;
+}
